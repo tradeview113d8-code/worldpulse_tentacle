@@ -1,0 +1,40 @@
+name: Module 5 - Cross-Tentacle Dashboard
+
+on:
+  schedule:
+    # Lệch sau cả 4 module: batch sáng (M1/M2/M3 @ 02:xx + M4 @ 03:30) ->
+    # đọc lúc 04:00. Batch chiều (M1/M2/M3 @ 14:xx, M3 cuối cùng @ 14:20)
+    # -> đọc lúc 14:50 (cách 30 phút, đúng đề xuất Mục 3.1 blueprint).
+    - cron: "0 4 * * *"
+    - cron: "50 14 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  cross-tentacle-dashboard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: 🔒 Hallucination Barrier — chặn import LLM SDK
+        run: |
+          set -e
+          FORBIDDEN='(^|[^a-zA-Z0-9_])(import[[:space:]]+openai|import[[:space:]]+anthropic|from[[:space:]]+openai|from[[:space:]]+anthropic|google\.generativeai|generativeai)'
+          if grep -RInE "$FORBIDDEN" --include="*.py" . ; then
+            echo "❌ Phát hiện import LLM SDK bị cấm trong Repo 2 (Tầng 0 Ingestion phải sạch LLM). Xem README mục 'Hallucination Barrier'."
+            exit 1
+          fi
+          echo "✅ Không phát hiện import LLM SDK — Hallucination Barrier còn nguyên vẹn."
+
+      - name: Run Dashboard
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DB_NAME: ${{ secrets.MONGODB_DB_NAME }}
+        run: python -m dashboard.report
