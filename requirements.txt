@@ -1,0 +1,8 @@
+# Dùng chung cả 3 module
+requests>=2.31.0
+pymongo>=4.6.0
+
+# Module 2 (search cascade) + Module 3 bước 2 (ngữ cảnh nhân vật)
+playwright>=1.40.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0

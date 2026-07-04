@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+
+# LƯU Ý: blackbook.json và data/module2_state/topic_rotation.json KHÔNG
+# được ignore — đây là state cần commit lại sau mỗi lần chạy workflow
+# (xem bước "Commit state files" trong module2_events.yml / module3_people.yml).
