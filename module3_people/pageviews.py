@@ -13,6 +13,8 @@ from config import people
 
 logger = logging.getLogger(__name__)
 
+HEADERS = {"User-Agent": "WorldSimulatorBot/1.0 (contact_your_email@gmail.com)"}
+
 
 def _yesterday_utc() -> datetime:
     return datetime.now(timezone.utc) - timedelta(days=1)
@@ -27,10 +29,9 @@ def fetch_top_titles(project: str, top_n: int) -> list[str]:
     url = people.WIKIMEDIA_PAGEVIEWS_URL.format(
         project=project, year=day.strftime("%Y"), month=day.strftime("%m"), day=day.strftime("%d")
     )
-    headers = {"User-Agent": "worldpulse-tentacle/1.0 (data collection bot)"}
 
     try:
-        resp = requests.get(url, headers=headers, timeout=people.HTTP_TIMEOUT_SECONDS)
+        resp = requests.get(url, headers=HEADERS, timeout=people.HTTP_TIMEOUT_SECONDS)
         resp.raise_for_status()
         data = resp.json()
     except Exception as e:

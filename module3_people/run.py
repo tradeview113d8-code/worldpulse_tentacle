@@ -14,8 +14,9 @@ trước khi `insert_with_ttl()`. impact_weight suy từ hạng pageview trong
 TOP_N_PER_PROJECT (rank 1 > rank 3) — ở module này impact_weight mang
 nghĩa "mức độ nổi bật", không phải "mức độ nguy hiểm", nhưng vẫn dùng
 đúng tên field để World Simulator xử lý đồng nhất xuyên module.
-extracted_facts giờ là list[str] (tách câu) thay vì 1 chuỗi context_summary
-duy nhất như trước tái cấu trúc.
+extracted_facts giờ là list[str] (tách câu) thay vì 1 chuỗi duy nhất.
+payload dùng key `trigger_event` (thay cho `context_summary` cũ) và bổ sung
+`hot_score` để World Simulator biết mức độ viral hiện tại của nhân vật.
 """
 import logging
 import os
@@ -59,7 +60,7 @@ def _gather_context(person: dict, cascade: SearchCascade) -> dict:
     summary = extractive_summary(combined_text, max_sentences=3) if combined_text else {"summary": "", "key_facts": []}
 
     return {
-        "context_summary": summary["summary"],
+        "trigger_event": summary["summary"],
         "key_facts": summary["key_facts"],
         "source_links": [link["url"] for link in links],
     }
@@ -128,8 +129,9 @@ def run():
         payload = {
             "name": person["name"],
             "region": person["region"],
-            "context_summary": context["context_summary"],
+            "trigger_event": context["trigger_event"],
             "source_links": context["source_links"],
+            "hot_score": 100,
         }
         doc = build_envelope(EventType.CHARACTER_SEED, impact_weight, extracted_facts, payload)
         insert_with_ttl(people.COLLECTION, doc, people.TTL_HOURS)

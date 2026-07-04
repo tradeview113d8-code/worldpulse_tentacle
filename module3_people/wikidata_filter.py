@@ -12,6 +12,8 @@ from config import people
 
 logger = logging.getLogger(__name__)
 
+HEADERS = {"User-Agent": "WorldSimulatorBot/1.0 (contact_your_email@gmail.com)"}
+
 
 def _get_wikidata_qid(title: str, lang: str) -> str | None:
     url = people.WIKIPEDIA_API_URL.format(lang=lang)
@@ -23,7 +25,7 @@ def _get_wikidata_qid(title: str, lang: str) -> str | None:
         "titles": title,
     }
     try:
-        resp = requests.get(url, params=params, timeout=people.HTTP_TIMEOUT_SECONDS)
+        resp = requests.get(url, params=params, timeout=people.HTTP_TIMEOUT_SECONDS, headers=HEADERS)
         resp.raise_for_status()
         pages = resp.json().get("query", {}).get("pages", {})
         for page in pages.values():
@@ -44,7 +46,7 @@ def is_human(qid: str) -> bool:
         "property": "P31",
     }
     try:
-        resp = requests.get(people.WIKIDATA_API_URL, params=params, timeout=people.HTTP_TIMEOUT_SECONDS)
+        resp = requests.get(people.WIKIDATA_API_URL, params=params, timeout=people.HTTP_TIMEOUT_SECONDS, headers=HEADERS)
         resp.raise_for_status()
         claims = resp.json().get("claims", {}).get("P31", [])
         for claim in claims:
